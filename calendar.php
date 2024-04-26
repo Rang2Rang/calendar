@@ -4,6 +4,7 @@
   include $_SERVER['DOCUMENT_ROOT'].'/function/core.php';
 
 
+
 	if(isset($_POST['year']) === true){
 		$year = $_POST['year'];
 	}else{
@@ -16,6 +17,39 @@
 		//전달받은 Month값
 		$month = date('m');
 	}
+//---------------------API적용------------------------//
+	//서비스키 변수에저장
+	$serviceKey = 'e59VqduelONmTZyJnlkEB97hFyqUWBaOULbvbsP03b74mKYUgA5EYuV6FDb96+KAA2ZZI3ltMN7ymNAkujjujA==';	
+	//API요청 URL생성
+	$url =  'http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo';
+	$url .= '?solYear=' . $year . '&solMonth=' . sprintf('%02d', $month) . '&ServiceKey=' . urlencode($serviceKey);
+	//응답받기
+	$response = file_get_contents($url);
+	//simpleXML을 이용하여 XML 파싱
+	$xml = new SimpleXMLElement($response);
+
+	//for문을 돌리기위한 배열의 길이 
+	$itemCount = count($xml->body->items->item);
+
+	$result = array(); // 결과를 저장할 배열 초기화
+
+	for ($i = 0; $i < $itemCount; $i++) {
+	    $item = $xml->body->items->item[$i];
+	    
+	    // 특정 키를 기준으로 데이터 매핑
+	    $key = (string)$item->locdate; // 예를 들어 locdate를 키로 사용
+	    $value = (string)$item->dateName; // dateName을 값으로 사용
+	    
+	    // key(locdate)의 끝 2자리만 가져오기 (일)
+	    $key = substr($key, -2);
+	    // int형으로 형변환
+	    $key = (int)$key;
+
+	    // 매핑된 데이터를 결과 배열에 추가
+	    $result[$key] = $value;
+	}
+
+
 
 	//현재 달의 총 날짜
 	$total_day = date('t', strtotime("$year-$month-01"));
@@ -39,40 +73,42 @@
 	$lastDayWeekdayIndex = date('w', strtotime($lastDayOfMonth));
 	$lastDayWeekday = $weekString[$lastDayWeekdayIndex];
 
-	
 ?>
-
+<script>
+	
+</script>
 <div id="calendar">
     <div><?php echo $year ?>년<?php echo $month ?>월</div>
     <button onclick="prev();">이전달</button>
     <button onclick="next();">다음달</button>
-    <script>
-    	// 지난 달 버튼 클릭시 호출되는 함수
-					function prev() {
-					    var prevMonth;
-					    var year = <?php echo $year; ?>;
-					    if(<?php echo $month; ?> === 1){
-					        prevMonth = 12;
-					        year = <?php echo $year; ?> - 1;
-					    } else {
-					        prevMonth = <?php echo $month; ?> - 1;  
-					    }
-					    updateCalendar(year, prevMonth);
-					};
+<script>
 
-        // 다음 달 버튼 클릭 시 호출되는 함수
-        function next() {
-            var nextMonth;
-            var year = <?php echo $year; ?>;
-            if (<?php echo $month; ?> === 12) {
-                nextMonth = 1;
-                year = <?php echo $year; ?> + 1;
-            } else {
-                nextMonth = <?php echo $month; ?> + 1;
-            }
-            updateCalendar(year, nextMonth);
-          }
-    </script>
+	let Year = <?php echo $year; ?>;
+	let Month = <?php echo $month; ?> - 1; 
+
+	function prev() {
+        if (Month === 0) {
+            Year--;
+            Month = 11;
+        } else {
+            Month--;
+        }
+        updateCalendar(Year, Month + 1);
+        fetchHolidayInfo(Year, Month +1);
+    }
+
+function next() {
+        if (Month === 11) {
+            Year++;
+            Month = 0;
+        } else {
+            Month++;
+        }
+        updateCalendar(Year, Month + 1);
+        fetchHolidayInfo(Year, Month +1);
+    }
+
+</script>
     <table>
         <tr>
             <th>일</th>
@@ -85,26 +121,40 @@
         </tr>
         <tr>
             <?php
+
             //시작요일 나올떄 까지 공백출력
-            for ($i = 0; $i < $firstDayWeekdayIndex; $i++) {
-                echo "<td></td>";
-            }
+						for ($i = 0; $i < $firstDayWeekdayIndex; $i++) {
+					        echo "<td></td>";
+					    }
+					
 
-            //마지막날 전까지 반복문 돌림 1씩 늘리면서
-            $Day = 1;
-            while ($Day <= $daysInMonth) {
-                echo "<td>$Day</td>";
+					// 마지막날 전까지 반복문 돌림 1씩 늘리면서
+						$Day = 1;
+						while ($Day <= $daysInMonth) {
+				    // $result 배열에서 $Day에 해당하는 값 가져오기
+				    if (isset($result[$Day])) {
+				        $value = $result[$Day];
+				    } else {
+				        $value = '';
+				    }
 
-                // firstDayWeekdayIndex는 최대 6, 여섯번째 왔을때 + day1 해서 7이면
-                // 줄바꿈 진행
-                // == 토요일일때 다음 줄로 이동
-                if (($firstDayWeekdayIndex + $Day) % 7 == 0) {
-                    echo "</tr><tr>";
-                }
+				    // 가져온 값이 있으면 그 값을 출력하고, 없으면 $Day를 출력
+				    if ($value !== '') {
+				        echo "<td>$Day$value</td>";
+				    } else {
+				        echo "<td>$Day</td>";
+				    }
 
-                // 다음 날로 이동
-                $Day++;
-            }
+					    // firstDayWeekdayIndex는 최대 6, 여섯 번째 왔을 때 + day1 해서 7이면
+					    // 줄바꿈 진행
+					    // == 토요일일 때 다음 줄로 이동
+					    if (($firstDayWeekdayIndex + $Day) % 7 == 0) {
+					        echo "</tr><tr>";
+					    }
+
+					    // 다음 날로 이동
+					    $Day++;
+					}
 
             ?>
         </tr>
