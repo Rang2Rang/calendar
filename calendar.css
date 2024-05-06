@@ -1,0 +1,97 @@
+/* 전체 캘린더 스타일 */
+#calendar {
+    width: 700px; /*캘린더 너비 */
+    padding: 10px; /* 내부 여백 */
+    border: 2px solid gray;
+
+  
+}
+
+/* 년/월 표시 스타일 */
+#day{
+    margin-bottom: 10px; /* 하단 여백 */
+    text-align: center; /*가운데설정 */
+    font-size: 45px;  /* 글꼴 크기 */
+    font-weight: bold; /*글꼴 진하게 */ 
+    color: black; /*글씨체 색깔 */
+    margin-bottom: 15px;
+
+    
+}
+
+#btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    height: 45px;
+}
+
+#prevbtn{
+    width: 54px;
+    height: 24px;
+    font-size: 15px; 
+    background-color: black; /* 배경색 설정 */
+    color: white; /* 버튼 텍스트 색상 */
+    border: 1px solid black;
+    opacity: 0.8;
+
+}
+
+#nextbtn{
+    width: 54px;
+    height: 24px;
+    font-size: 15px; 
+    background-color: black; /* 배경색 설정 */
+    color: white; /* 버튼 텍스트 색상 */
+    border: 1px solid black;
+    opacity: 0.8;
+
+}
+
+#prev{
+    background-color: #dadde3;
+    font-weight: bold;
+}
+
+#next{
+    background-color: #dadde3;
+    font-weight: bold;
+}
+
+
+
+/* 캘린더 테이블 스타일 */
+#calendar table {
+    width: 100%; 
+    border-collapse: collapse;
+    table-layout: auto; /*테이블 레이아웃 고정 */
+}
+
+#calendar td {
+    border: 1px solid gray; 
+    padding: 8px;
+    text-align: center; /* 가운제 정렬 */
+    width: 80px; /* 셀 너비 */
+    height: 70px; /* 셀 높이 */
+
+}
+
+/* 요일 헤더 스타일 */
+#calendar th {
+    background-color: gray; /* 배경색 설정 */
+    color: black; /* 텍스트 색상 설정 */
+    font-weight: bold;
+    border: 1px solid black; 
+    padding: 8px;
+    text-align: center; /* 가운제 정렬 */
+    width: 80px; /* 셀 너비 */
+    height: 20px; /* 셀 높이 */
+}
+
+#calendar td {
+    font-size: 13px;
+    color: black; /* 텍스트 색상 설정 */
+    font-weight: bold;
+}
+
